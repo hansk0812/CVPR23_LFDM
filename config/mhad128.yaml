@@ -7,7 +7,7 @@
 
 
 dataset_params:
-  root_dir: /data/hfn5052/text2motion/dataset/MHAD/crop_image
+  root_dir: /home/hans/CVPR23_LFDM/MHAD/
   frame_shape: 128
   id_sampling: True
   pairs_list: null

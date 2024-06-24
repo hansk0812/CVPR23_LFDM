@@ -31,14 +31,14 @@ class FlowDiffusion(nn.Module):
         self.only_use_flow = only_use_flow
 
         if pretrained_pth != "":
-            checkpoint = torch.load(pretrained_pth)
+            checkpoint = torch.load(pretrained_pth, map_location=torch.device('cpu'))
         with open(config_pth) as f:
             config = yaml.safe_load(f)
 
         self.generator = Generator(num_regions=config['model_params']['num_regions'],
                                    num_channels=config['model_params']['num_channels'],
                                    revert_axis_swap=config['model_params']['revert_axis_swap'],
-                                   **config['model_params']['generator_params']).cuda()
+                                   **config['model_params']['generator_params'])
         if pretrained_pth != "":
             self.generator.load_state_dict(checkpoint['generator'])
             self.generator.eval()
@@ -47,7 +47,7 @@ class FlowDiffusion(nn.Module):
         self.region_predictor = RegionPredictor(num_regions=config['model_params']['num_regions'],
                                                 num_channels=config['model_params']['num_channels'],
                                                 estimate_affine=config['model_params']['estimate_affine'],
-                                                **config['model_params']['region_predictor_params']).cuda()
+                                                **config['model_params']['region_predictor_params'])
         if pretrained_pth != "":
             self.region_predictor.load_state_dict(checkpoint['region_predictor'])
             self.region_predictor.eval()
@@ -107,9 +107,9 @@ class FlowDiffusion(nn.Module):
             self.unet.train()
             self.diffusion.train()
             self.lr = lr
-            self.loss = torch.tensor(0.0).cuda()
-            self.rec_loss = torch.tensor(0.0).cuda()
-            self.rec_warp_loss = torch.tensor(0.0).cuda()
+            self.loss = torch.tensor(0.0) #.cuda()
+            self.rec_loss = torch.tensor(0.0) #.cuda()
+            self.rec_warp_loss = torch.tensor(0.0) #.cuda()
             self.optimizer_diff = torch.optim.Adam(self.diffusion.parameters(),
                                                    lr=lr, betas=adam_betas)
 
@@ -145,7 +145,7 @@ class FlowDiffusion(nn.Module):
         if self.is_train:
             if self.use_residual_flow:
                 h, w, = H//4, W//4
-                identity_grid = self.get_grid(b, nf, h, w, normalize=True).cuda()
+                identity_grid = self.get_grid(b, nf, h, w, normalize=True) #.cuda()
                 self.loss = self.diffusion(torch.cat((self.real_vid_grid - identity_grid,
                                                       self.real_vid_conf*2-1), dim=1),
                                            self.ref_img_fea,
@@ -194,7 +194,7 @@ class FlowDiffusion(nn.Module):
                                      batch_size=1, cond_scale=cond_scale)
         if self.use_residual_flow:
             b, _, nf, h, w = pred[:, :2, :, :, :].size()
-            identity_grid = self.get_grid(b, nf, h, w, normalize=True).cuda()
+            identity_grid = self.get_grid(b, nf, h, w, normalize=True) #.cuda()
             self.sample_vid_grid = pred[:, :2, :, :, :] + identity_grid
         else:
             self.sample_vid_grid = pred[:, :2, :, :, :]
@@ -216,12 +216,12 @@ class FlowDiffusion(nn.Module):
         self.sample_warped_vid = torch.stack(sample_warped_img_list, dim=2)
 
     def set_train_input(self, ref_img, real_vid, ref_text):
-        self.ref_img = ref_img.cuda()
-        self.real_vid = real_vid.cuda()
+        self.ref_img = ref_img #.cuda()
+        self.real_vid = real_vid #.cuda()
         self.ref_text = ref_text
 
     def set_sample_input(self, sample_img, sample_text):
-        self.sample_img = sample_img.cuda()
+        self.sample_img = sample_img #.cuda()
         self.sample_text = sample_text
 
     def print_learning_rate(self):
@@ -266,7 +266,7 @@ if __name__ == "__main__":
                           img_size=16,
                           config_pth="/workspace/code/CVPR23_LFDM/config/mug128.yaml",
                           pretrained_pth="")
-    model.cuda()
+    #model.cuda()
     # model.train()
     # model.set_train_input(ref_img=ref_img, real_vid=real_vid, ref_text=ref_text)
     # model.optimize_parameters()

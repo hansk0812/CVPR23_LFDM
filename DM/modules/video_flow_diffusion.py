@@ -437,7 +437,7 @@ class Unet3D(nn.Module):
         if self.learn_null_cond:
             self.null_cond_emb = nn.Parameter(torch.randn(1, cond_dim)) if self.has_cond else None
         else:
-            self.null_cond_emb = torch.zeros(1, cond_dim).cuda() if self.has_cond else None
+            self.null_cond_emb = torch.zeros(1, cond_dim) if self.has_cond else None #.cuda() 
 
         cond_dim = time_dim + int(cond_dim or 0)
 
@@ -557,7 +557,7 @@ class Unet3D(nn.Module):
             batch, device = x.shape[0], x.device
             self.null_cond_mask = prob_mask_like((batch,), null_cond_prob, device=device)
             if none_cond_mask is not None:
-                self.null_cond_mask = torch.logical_or(self.null_cond_mask, torch.tensor(none_cond_mask).cuda())
+                self.null_cond_mask = torch.logical_or(self.null_cond_mask, torch.tensor(none_cond_mask)) #.cuda())
             cond = torch.where(rearrange(self.null_cond_mask, 'b -> b 1'), self.null_cond_emb, cond)
             t = torch.cat((t, cond), dim=-1)
 
