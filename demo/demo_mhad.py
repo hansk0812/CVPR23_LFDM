@@ -28,7 +28,7 @@ cond_scale = 1.
 # downloaded the pretrained DM model and put its path here
 RESTORE_FROM = "/home/hans/CVPR23_LFDM/files/DM_MHAD.pth"
 # downloaded the pretrained LFAE model and put its path here
-AE_RESTORE_FROM = "/home/hans/CVPR23_LFDM/files/LFAE_MHAD.pth"
+AE_RESTORE_FROM ="/home/hans/CVPR23_LFDM/files/LFAE_MHAD.pth"  
 config_pth = "/home/hans/CVPR23_LFDM/config/mhad128.yaml"
 CKPT_DIR = os.path.join(root_dir, "demo"+postfix)
 os.makedirs(CKPT_DIR, exist_ok=True)
@@ -82,7 +82,7 @@ def main():
     setup_seed(args.random_seed)
 
     model = FlowDiffusion(is_train=True,
-                          sampling_timesteps=1000,
+                          sampling_timesteps=10,
                           pretrained_pth=AE_RESTORE_FROM,
                           config_pth=config_pth)
     #model.cuda()
@@ -164,8 +164,8 @@ def main():
             new_im_arr = np.array(new_im)
             new_im_list.append(new_im_arr)
 
-        video_name = "%04d_%s_%.2f.gif" % (cnt, ref_img_name, cond_scale)
-        print(video_name)
+        video_name = "%s_%04d_%s_%.2f.gif" % (ref_text, cnt, ref_img_name, cond_scale)
+        print(ref_text, video_name)
         imageio.mimsave(os.path.join(CKPT_DIR, video_name), new_im_list)
         cnt += 1
 
